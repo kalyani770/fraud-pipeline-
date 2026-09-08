@@ -24,7 +24,7 @@ st.set_page_config(
 )
 
 # ── Config ────────────────────────────────────────────────────────────────────
-API_URL    = "http://localhost:8000"
+API_URL    = "https://fraud-detection-api-4zha.onrender.com"
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 
