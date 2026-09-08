@@ -1,0 +1,10 @@
+venv/
+data/venv/
+__pycache__/
+*.pyc
+.env
+data/train_transaction.csv
+data/train_identity.csv
+model/fraud_model.joblib
+model/feature_names.joblib
+model/threshold.joblib

@@ -1,0 +1,33 @@
+# Kafka
+kafka-python==2.0.2
+
+# Data & ML
+pandas==2.1.4
+numpy==1.26.2
+scikit-learn==1.3.2
+xgboost==2.0.3
+shap==0.44.0
+pyarrow==14.0.2    # for Parquet files
+
+# Feature store (online)
+redis==5.0.1
+
+# Serving
+fastapi==0.108.0
+uvicorn==0.25.0
+pydantic==2.5.3
+
+# Monitoring
+evidently==0.4.11
+
+# Dashboard
+streamlit==1.29.0
+plotly==5.18.0
+
+# Causal inference (Week 5)
+causalml==0.15.0
+
+# Utilities
+python-dotenv==1.0.0
+joblib==1.3.2
+tqdm==4.66.1

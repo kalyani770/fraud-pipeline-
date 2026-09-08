@@ -1,0 +1,100 @@
+============================================================
+STEP 1: LOADING DATA
+============================================================
+Shape          : 590,540 rows × 394 columns
+Memory usage   : 1878.7 MB
+Fraud cases    : 20,663 (3.50%)
+Legit cases    : 569,877 (96.50%)
+
+============================================================
+STEP 2: CLASS IMBALANCE
+============================================================
+Imbalance ratio : 27.6:1 (legit:fraud)
+scale_pos_weight: 27.6  ← use this in XGBoost
+
+WHY THIS MATTERS:
+  A naive model predicting 'not fraud' always gets 96.5% accuracy
+  but catches ZERO fraud. Accuracy is useless here.
+  We use Precision-Recall AUC instead.
+
+  Plot saved: model/plots/01_class_imbalance.png
+
+============================================================
+STEP 3: MISSING VALUES
+============================================================
+Columns with >50% missing: 174
+We will DROP these columns — too sparse to be useful
+
+Top 10 columns by missing %:
+  dist2                93.6% missing
+  D7                   93.4% missing
+  D13                  89.5% missing
+  D14                  89.5% missing
+  D12                  89.0% missing
+  D6                   87.6% missing
+  D9                   87.3% missing
+  D8                   87.3% missing
+  V153                 86.1% missing
+  V149                 86.1% missing
+
+  Plot saved: model/plots/02_missing_values.png
+
+============================================================
+STEP 4: KEY FEATURE ANALYSIS
+============================================================
+TransactionAmt stats:
+  Fraud  — mean: $149.24 | median: $75.00
+  Legit  — mean: $134.51 | median: $68.50
+
+Fraud rate by ProductCD:
+  C: 11.7% fraud rate (68,519.0 txns)
+  S: 5.9% fraud rate (11,628.0 txns)
+  H: 4.8% fraud rate (33,024.0 txns)
+  R: 3.8% fraud rate (37,699.0 txns)
+  W: 2.0% fraud rate (439,670.0 txns)
+
+Fraud rate by card network (card4):
+  discover: 7.7% (6,651.0 txns)
+  visa: 3.5% (384,767.0 txns)
+  mastercard: 3.4% (189,217.0 txns)
+  american express: 2.9% (8,328.0 txns)
+
+  Plot saved: model/plots/03_key_features.png
+
+============================================================
+STEP 5: FEATURE ENGINEERING
+============================================================
+Building offline feature table...
+Dropped 174 high-missing columns
+Remaining columns: 220
+
+[+] amt_log: log(1 + TransactionAmt) — reduces right skew
+[+] amt_is_round: 1 if amount has no cents — fraudsters often use round numbers
+[+] amt_band: bucketed amount — captures non-linear fraud risk by amount range
+[+] email_match: 1 if purchaser and recipient email domains match
+[+] card1_txn_count: how many transactions this card appears in the dataset
+[+] product_encoded: ordinal encoding of ProductCD
+
+============================================================
+STEP 6: SAVING OFFLINE FEATURE STORE
+============================================================
+Saved to        : data/features_offline.parquet
+Final shape     : 590,540 rows × 216 columns
+Feature count   : 214 features (excl. ID + label)
+
+Engineered features added:
+  amt_log                   fraud_mean=4.374  legit_mean=4.383
+  amt_is_round              fraud_mean=0.527  legit_mean=0.516
+  card1_txn_count           fraud_mean=2334.681  legit_mean=2535.855
+  product_encoded           fraud_mean=1.227  legit_mean=0.580
+  email_match               fraud_mean=0.479  legit_mean=0.163
+
+============================================================
+SESSION 2 COMPLETE ✅
+============================================================
+
+Next steps (Session 3):
+  1. Train XGBoost on features_offline.parquet
+  2. Evaluate with Precision-Recall AUC (not accuracy)
+  3. Add SHAP explainability
+  4. Tune classification threshold for business trade-off

@@ -1,0 +1,109 @@
+============================================================
+SESSION 7: CAUSAL IMPACT ANALYSIS
+============================================================
+
+QUESTION WE ARE ANSWERING:
+  Did blocking flagged transactions CAUSE fewer fraud losses?
+  Or would those fraudsters have stopped anyway?
+
+============================================================
+STEP 1: LOAD DATA + MODEL PREDICTIONS
+============================================================
+Dataset     : 590,540 transactions
+Flagged     : 15,564 (2.6%)
+Actual fraud: 20,663 (3.5%)
+
+============================================================
+STEP 2: SIMULATE TREATMENT & CONTROL GROUPS
+============================================================
+
+REAL WORLD:
+  Treatment = transaction was BLOCKED by fraud system
+  Control   = transaction was ALLOWED through
+  Outcome   = did fraud loss actually occur?
+
+SIMULATION (since we only have historical data):
+  Treatment = model flagged the transaction (model_flagged=1)
+  Control   = model did not flag it (model_flagged=0)
+  Outcome   = isFraud (ground truth label)
+
+NAIVE COMPARISON (biased — ignores confounders):
+  Fraud rate in FLAGGED group  : 73.0%
+  Fraud rate in ALLOWED group  : 1.6%
+  Naive difference             : 71.4%
+
+WHY THIS IS BIASED:
+  The model flags HIGH-RISK transactions by design.
+  Of course flagged transactions have more fraud —
+  that's what the model is supposed to do.
+  We need causal inference to get the TRUE effect.
+
+============================================================
+STEP 3: T-LEARNER CAUSAL ESTIMATION
+============================================================
+
+T-Learner trains TWO separate models:
+  Model T1 — trained ONLY on treated units (flagged txns)
+  Model T0 — trained ONLY on control units (allowed txns)
+  CATE = T1.predict(X) - T0.predict(X) for each transaction
+  CATE = Conditional Average Treatment Effect
+
+Sample size : 50,000
+Treated     : 1,332 transactions
+Control     : 48,668 transactions
+
+Training T1 (treated model)...
+Training T0 (control model)...
+Computing CATE (individual treatment effects)...
+
+CAUSAL RESULTS:
+  ATE (Average Treatment Effect) : 67.89%
+
+  INTERPRETATION: Blocking transactions INCREASES fraud outcome
+  by 67.9% on average — suggests model is flagging legitimate
+  transactions that then get disputed as fraud.
+
+============================================================
+STEP 4: CATE BY CUSTOMER SEGMENT
+============================================================
+
+KEY INSIGHT: Average effect hides segment differences.
+Some customers respond strongly to intervention,
+others would have resolved fraud without intervention.
+
+CATE by Risk Segment:
+  Q1-Low Risk          CATE=+82.15%  ↑ increases fraud | n=12,500
+  Q2-Med Risk          CATE=+71.31%  ↑ increases fraud | n=12,500
+  Q3-High Risk         CATE=+60.91%  ↑ increases fraud | n=12,500
+  Q4-Very High         CATE=+57.18%  ↑ increases fraud | n=12,500
+
+BUSINESS IMPLICATION:
+  Block aggressively for Q4 (Very High Risk) — highest causal impact
+  Be careful with Q1 (Low Risk) — blocking may not help
+
+============================================================
+STEP 5: VISUALIZATIONS
+============================================================
+Plot saved: causal/plots/06_causal_impact.png
+Plot saved: causal/plots/07_cate_by_segment.png
+
+============================================================
+STEP 6: BUSINESS RECOMMENDATIONS
+============================================================
+
+High-impact interventions (CATE < -10%) : 0 transactions
+  → Block these aggressively
+
+Low/negative impact (CATE > +10%)       : 49,988 transactions
+  → Consider softer intervention (flag but don't block)
+
+POLICY RECOMMENDATION:
+  Tier 1 (CATE < -0.1) : Hard block — intervention strongly reduces fraud
+  Tier 2 (CATE -0.1–0) : Soft flag — monitor, add friction (OTP)
+  Tier 3 (CATE > 0)    : Allow — blocking may increase disputes
+
+============================================================
+SESSION 7 COMPLETE ✅
+============================================================
+
+Next: Session 8 — GitHub README + deployment + resume write-up
