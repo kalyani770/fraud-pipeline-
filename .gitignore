@@ -5,9 +5,6 @@ __pycache__/
 .env
 data/train_transaction.csv
 data/train_identity.csv
-model/fraud_model.joblib
-model/feature_names.joblib
-model/threshold.joblib
 data/features_offline.parquet
 data/test_transaction.csv
 data/test_identity.csv
