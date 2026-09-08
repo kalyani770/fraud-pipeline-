@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: fraud-detection-api
+    runtime: python
+    buildCommand: pip install fastapi uvicorn xgboost shap joblib scikit-learn numpy pandas pyarrow
+    startCommand: uvicorn serving.api:app --host 0.0.0.0 --port $PORT
