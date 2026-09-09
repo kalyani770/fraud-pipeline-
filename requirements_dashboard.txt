@@ -1,0 +1,6 @@
+streamlit==1.29.0
+plotly
+requests
+redis
+numpy
+pandas
